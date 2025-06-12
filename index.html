@@ -145,10 +145,8 @@
     </div>
 
     <!-- Tela de Vitória/Derrota -->
-    <div id="end-screen" class="hidden h-screen w-screen flex-col items-center justify-center p-4 text-center">
-        <h1 id="end-title" class="text-5xl font-bold mb-4"></h1>
-        <p id="end-message" class="text-xl mb-8"></p>
-        <button id="restart-button" class="bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-8 rounded-lg text-xl transition-transform duration-200 transform hover:scale-105">Jogar Novamente</button>
+    <div id="end-screen" class="hidden h-screen w-screen flex-col items-center justify-center p-4 text-center bg-gray-900">
+        <!-- Conteúdo injetado pelo JavaScript -->
     </div>
 
     <!-- Modal para Puzzles -->
@@ -172,7 +170,7 @@
         const gameScreen = document.getElementById('game-screen');
         const endScreen = document.getElementById('end-screen');
         const startButton = document.getElementById('start-button');
-        const restartButton = document.getElementById('restart-button');
+        
         const timerDisplay = document.getElementById('timer');
         const messageDisplay = document.getElementById('message-display');
 
@@ -186,7 +184,7 @@
         const modalOverlay = document.getElementById('modal-overlay');
         const modalContent = document.getElementById('modal-content');
         
-        let synth, successSound, errorSound, clickSound, staticNoise, alarmSound, drawerOpenSound, computerStartSound;
+        let synth, successSound, errorSound, clickSound, staticNoise, alarmSound, drawerOpenSound, computerStartSound, ringtoneSound, callConnectSound;
 
         // --- Funções de Som ---
         function setupAudio() {
@@ -214,6 +212,16 @@
                 startupSynth.triggerAttackRelease("G4", "8n", now + 0.2);
                 startupSynth.triggerAttackRelease("C5", "4n", now + 0.4);
             };
+            
+            // Sons de chamada
+            const ringtoneSynth = new Tone.Synth().toDestination();
+            ringtoneSound = () => {
+                 const now = Tone.now();
+                 ringtoneSynth.triggerAttackRelease("A5", "8n", now);
+                 ringtoneSynth.triggerAttackRelease("C6", "8n", now + 0.2);
+                 ringtoneSynth.triggerAttackRelease("A5", "8n", now + 0.4);
+            }
+            callConnectSound = new Tone.Synth({oscillator: {type:'sawtooth'}}).toDestination();
         }
 
         // --- Funções do Jogo ---
@@ -253,19 +261,27 @@
             clearInterval(gameState.timerId);
             gameScreen.classList.add('hidden');
             endScreen.classList.remove('hidden');
-            const endTitle = document.getElementById('end-title');
-            const endMessage = document.getElementById('end-message');
+            endScreen.classList.add('flex'); // Para centralizar o conteúdo
 
             if (isWin) {
-                endTitle.textContent = "Diploma Recuperado!";
-                endTitle.classList.add('text-green-500');
-                endMessage.textContent = "Parabéns! Você provou seu conhecimento e está pronto para a formatura!";
                 successSound.triggerAttackRelease("C5", "0.5");
+                 endScreen.innerHTML = `
+                    <div class="w-full max-w-4xl">
+                        <div class="video-container mb-4 rounded-lg overflow-hidden shadow-2xl">
+                             <iframe src="https://player.vimeo.com/video/1092876055?h=9f2fc19b3b&autoplay=1&loop=1&title=0&byline=0&portrait=0" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>
+                        </div>
+                        <h1 class="text-5xl font-bold mb-4 text-green-500">Diploma Recuperado!</h1>
+                        <p class="text-xl mb-8">Parabéns! Você provou seu conhecimento e está pronto para a formatura!</p>
+                        <button onclick="window.location.reload()" class="bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-8 rounded-lg text-xl transition-transform duration-200 transform hover:scale-105">Jogar Novamente</button>
+                    </div>
+                `;
             } else {
-                endTitle.textContent = "Tempo Esgotado!";
-                endTitle.classList.add('text-red-500');
-                endMessage.textContent = "A cerimônia de formatura começou sem você... Estude mais o Regimento e tente novamente.";
                 errorSound.triggerAttackRelease("C3", "0.5");
+                 endScreen.innerHTML = `
+                    <h1 class="text-5xl font-bold mb-4 text-red-500">Tempo Esgotado!</h1>
+                    <p class="text-xl mb-8">A cerimônia de formatura começou sem você... Estude mais o Regimento e tente novamente.</p>
+                    <button onclick="window.location.reload()" class="bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-8 rounded-lg text-xl transition-transform duration-200 transform hover:scale-105">Jogar Novamente</button>
+                `;
             }
         }
 
@@ -546,13 +562,13 @@
                 updateObjectStates();
                 return;
             }
-            const content = `
+             const content = `
                 <h2 class="text-2xl font-bold mb-4 text-yellow-500">Chamada de Vídeo Recebida...</h2>
                 <div class="video-container mb-4">
                     <!-- INSTRUÇÃO: Substitua o ID e o HASH do vídeo abaixo pelo do seu vídeo no Vimeo -->
-                    <iframe src="https://player.vimeo.com/video/1092796983?h=329987718c&autoplay=1&loop=0&autopause=0" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>
+                    <iframe src="https://player.vimeo.com/video/1092796983?h=329987718c&autoplay=1&loop=1&autopause=0" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>
                 </div>
-                <p id="call-text" class="mb-4 min-h-[48px]">O vídeo mostra um colega desesperado pedindo ajuda com uma resposta em troca de um atalho...</p>
+                <p id="call-text" class="mb-4 min-h-[48px]">Um colega desesperado aparece na tela pedindo ajuda com o código da gaveta em troca de um atalho...</p>
                 <div id="call-buttons" class="flex gap-4 justify-center mt-6">
                     <button onclick="handlePlotTwistChoice('refuse')" class="bg-red-600 hover:bg-red-700 text-white py-2 px-6 rounded-lg font-semibold">Recusar Ajuda</button>
                     <button onclick="handlePlotTwistChoice('help')" class="bg-green-600 hover:bg-green-700 text-white py-2 px-6 rounded-lg font-semibold">Ajudar o Colega</button>
@@ -575,7 +591,7 @@
                 closeModal();
                 showMessage("CONDUTA ÉTICA VERIFICADA! Recompensa por integridade: +3 minutos.", 8000);
             }
-            setTimeout(() => showMessage("O painel elétrico da sala acendeu.", 4000), 8000);
+            setTimeout(() => showMessage("O painel elétrico da sala acendeu.", 4000), 1000);
             updateObjectStates();
         }
         
@@ -656,7 +672,7 @@
             clickSound.triggerAttackRelease("G4", "0.1");
             const content = `
                 <h2 class="text-2xl font-bold mb-4 text-[#005594]">O Cofre Final</h2>
-                <p class="mb-4">O código parece ser a junção de dois números de artigo. A luz pisca os números '6' '8' '2' e '7'. Qual a ordem correta, pensando no percurso de um aluno (Regras e depois o Prêmio)?</p>
+                <p class="mb-4">O código parece ser a junção de dois números de artigo. A luz pisca os números 26 e 78. Qual a ordem correta, pensando no percurso de um aluno (Regras e depois o Prêmio)?</p>
                 <input type="text" id="safe-password" class="w-full p-3 border border-gray-400 rounded-md mb-4 text-center mono text-2xl" autocomplete="off" placeholder="XXXX">
                  <div class="flex gap-4 justify-center">
                     <button onclick="closeModal()" class="bg-gray-500 hover:bg-gray-600 text-white py-2 px-6 rounded-lg font-semibold">Voltar</button>
@@ -668,7 +684,7 @@
 
         function checkSafePassword() {
             const pass = document.getElementById('safe-password').value;
-            if (pass === '2678') { // Art. 28 (Regras) + Art. 78 (Prêmio)
+            if (pass === '2678') { // Art. 26 (Regras) + Art. 78 (Prêmio)
                 gameState.puzzlesSolved[7] = true;
                 closeModal();
                 endGame(true);
@@ -680,8 +696,7 @@
         
         // --- Event Listeners ---
         startButton.addEventListener('click', startGame);
-        restartButton.addEventListener('click', () => window.location.reload());
-
+        
         objDrawer.addEventListener('click', () => {
             if (!gameState.puzzlesSolved[1]) puzzleDrawer();
             else showMessage("Eu já abri esta gaveta.", 2000);
