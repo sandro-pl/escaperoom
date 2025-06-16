@@ -70,9 +70,6 @@
             box-shadow: 0 0 15px #f08324;
             opacity: 0.8;
         }
-        .switch {
-            transition: background-color 0.3s;
-        }
         .video-container {
             position: relative;
             padding-bottom: 56.25%; /* 16:9 */
@@ -97,7 +94,7 @@
         <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/86/Senac_logo.svg/1200px-Senac_logo.svg.png" alt="Logo Senac" class="h-16 mx-auto mb-8">
         <h1 class="text-4xl md:text-5xl font-bold text-orange-500 mb-4">O Mistério do Diploma Desaparecido</h1>
         <p class="max-w-2xl text-lg text-gray-300 mb-8">
-            Você está a minutos da formatura, mas seu diploma sumiu! Um instrutor o trancou nesta sala para um teste final. Você tem <strong>10 minutos</strong> para provar que conhece o Regimento Educacional e encontrar seu diploma.
+            Você está a minutos da formatura, mas seu diploma sumiu! Um instrutor o trancou nesta sala para um teste final. Você tem <strong>15 minutos</strong> para provar que conhece o Regimento Educacional e encontrar seu diploma.
         </p>
         <button id="start-button" class="bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-8 rounded-lg text-xl transition-transform duration-200 transform hover:scale-105">Começar o Desafio</button>
         <p class="mt-4 text-sm text-gray-500">Desenvolvimento: Sandro Polizel</p>
@@ -107,14 +104,14 @@
     <div id="game-screen" class="h-screen w-screen hidden flex-col">
         <header class="w-full bg-black bg-opacity-50 p-4 flex justify-between items-center">
             <h2 class="text-2xl font-bold text-orange-500">Escape Room Senac</h2>
-            <div id="timer" class="mono text-4xl font-bold bg-red-600 px-4 py-1 rounded-lg">10:00</div>
+            <div id="timer" class="mono text-4xl font-bold bg-red-600 px-4 py-1 rounded-lg">15:00</div>
         </header>
 
         <main class="flex-grow room-bg relative p-8">
             <div class="absolute inset-0 bg-black bg-opacity-40"></div>
             <div id="message-display" class="absolute top-20 left-1/2 -translate-x-1/2 text-gray-900 p-4 rounded-lg shadow-2xl opacity-0 transition-opacity duration-500 z-[100] font-semibold border-2 border-orange-500" style="background-color: white;"></div>
             
-            <div class="relative z-10 grid grid-cols-3 grid-rows-2 h-full gap-8">
+            <div class="relative z-10 grid grid-cols-4 grid-rows-2 h-full gap-8">
                 <!-- Objetos Interativos -->
                 <div id="obj-drawer" class="interactive-object bg-black bg-opacity-60 flex flex-col items-center justify-center p-4">
                     <span class="text-6xl">🗄️</span>
@@ -128,17 +125,26 @@
                     <span class="text-6xl">⚡</span>
                     <h3 class="text-xl font-semibold mt-2">Painel Elétrico</h3>
                 </div>
-                 <div id="obj-book" class="interactive-object bg-black bg-opacity-60 flex flex-col items-center justify-center p-4">
+                <div id="obj-book" class="interactive-object bg-black bg-opacity-60 flex flex-col items-center justify-center p-4">
                     <span class="text-6xl">📖</span>
                     <h3 class="text-xl font-semibold mt-2">Regimento</h3>
                 </div>
-                 <div id="obj-recorder" class="interactive-object bg-black bg-opacity-60 flex flex-col items-center justify-center p-4 opacity-50 cursor-not-allowed">
+                <div id="obj-recorder" class="interactive-object bg-black bg-opacity-60 flex flex-col items-center justify-center p-4 opacity-50 cursor-not-allowed">
                     <span class="text-6xl">🎤</span>
                     <h3 class="text-xl font-semibold mt-2">Gravador Antigo</h3>
                 </div>
                 <div id="obj-safe" class="interactive-object bg-black bg-opacity-60 flex flex-col items-center justify-center p-4 opacity-50 cursor-not-allowed">
                      <span class="text-6xl">📦</span>
                     <h3 class="text-xl font-semibold mt-2">Cofre Final</h3>
+                </div>
+                <!-- NOVOS OBJETOS -->
+                <div id="obj-calendar" class="interactive-object bg-black bg-opacity-60 flex flex-col items-center justify-center p-4">
+                     <span class="text-6xl">📅</span>
+                    <h3 class="text-xl font-semibold mt-2">Calendário</h3>
+                </div>
+                <div id="obj-board" class="interactive-object bg-black bg-opacity-60 flex flex-col items-center justify-center p-4">
+                     <span class="text-6xl">📌</span>
+                    <h3 class="text-xl font-semibold mt-2">Quadro de Avisos</h3>
                 </div>
             </div>
         </main>
@@ -151,16 +157,27 @@
 
     <!-- Modal para Puzzles -->
     <div id="modal-overlay" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center p-4 z-50 hidden opacity-0">
-        <div id="modal-content" class="modal-content bg-white text-gray-800 p-8 rounded-2xl shadow-2xl max-w-xl w-full transform scale-95">
+        <div id="modal-content" class="modal-content bg-white text-gray-800 p-8 rounded-2xl shadow-2xl max-w-2xl w-full transform scale-95">
             <!-- Conteúdo do Puzzle -->
         </div>
     </div>
     
     <script>
         const gameState = {
-            timer: 600, // 10 minutos
+            timer: 900, // 15 minutos
             timerId: null,
-            puzzlesSolved: { 1: false, 2: false, 3: false, 4: false, 5: false, 6: false },
+            puzzlesSolved: {
+                drawer: false,       // 1. Gaveta
+                computerLogin: false,// 2. Login do PC
+                jigsaw: false,       // 3. Quebra-cabeça
+                recycleBin: false,   // 4. Lixeira (NOVO)
+                logicGrid: false,    // 5. Relatório de Lógica
+                plotTwist: false,    // 6. Chamada de vídeo
+                panel: false,        // 7. Painel Elétrico
+                recorder: false,     // 8. Gravador
+                safe: false          // 9. Cofre
+            },
+            noteRead: false, // Flag to check if the locked note was read
             selectedJigsawPiece: null,
             panelSequence: [],
             plotTwistShown: false
@@ -180,31 +197,26 @@
         const objBook = document.getElementById('obj-book');
         const objPanel = document.getElementById('obj-panel');
         const objRecorder = document.getElementById('obj-recorder');
+        const objCalendar = document.getElementById('obj-calendar'); 
+        const objBoard = document.getElementById('obj-board');       
         
         const modalOverlay = document.getElementById('modal-overlay');
         const modalContent = document.getElementById('modal-content');
         
-        let synth, successSound, errorSound, clickSound, staticNoise, alarmSound, drawerOpenSound, computerStartSound, ringtoneSound, callConnectSound;
+        let synth, successSound, errorSound, clickSound, staticNoise, alarmSound, drawerOpenSound, computerStartSound;
 
         // --- Funções de Som ---
         function setupAudio() {
-            // Sons genéricos
             clickSound = new Tone.Synth({ oscillator: { type: 'sine' }, envelope: { attack: 0.01, decay: 0.1, sustain: 0.1, release: 0.1 } }).toDestination();
             successSound = new Tone.Synth({ oscillator: { type: 'triangle' } }).toDestination();
             errorSound = new Tone.Synth({ oscillator: { type: 'square' }, envelope: { attack: 0.01, decay: 0.2, sustain: 0, release: 0.2 } }).toDestination();
             staticNoise = new Tone.Noise("white").toDestination();
             staticNoise.volume.value = -20;
             alarmSound = new Tone.Synth({ oscillator: {type: "fatsawtooth", count: 3, spread: 30}, envelope: {attack: 0.01, decay: 0.2, sustain: 0.1, release: 0.4}}).toDestination();
-
-            // Som de gaveta abrindo
             const drawerFilter = new Tone.AutoFilter("8n").toDestination().start();
             const drawerNoise = new Tone.Noise("pink").connect(drawerFilter);
             drawerNoise.volume.value = -15;
-            drawerOpenSound = () => {
-                drawerNoise.start().stop("+0.3");
-            };
-
-            // Som de computador ligando
+            drawerOpenSound = () => { drawerNoise.start().stop("+0.3"); };
             const startupSynth = new Tone.Synth().toDestination();
             computerStartSound = () => {
                 const now = Tone.now();
@@ -212,16 +224,6 @@
                 startupSynth.triggerAttackRelease("G4", "8n", now + 0.2);
                 startupSynth.triggerAttackRelease("C5", "4n", now + 0.4);
             };
-            
-            // Sons de chamada
-            const ringtoneSynth = new Tone.Synth().toDestination();
-            ringtoneSound = () => {
-                 const now = Tone.now();
-                 ringtoneSynth.triggerAttackRelease("A5", "8n", now);
-                 ringtoneSynth.triggerAttackRelease("C6", "8n", now + 0.2);
-                 ringtoneSynth.triggerAttackRelease("A5", "8n", now + 0.4);
-            }
-            callConnectSound = new Tone.Synth({oscillator: {type:'sawtooth'}}).toDestination();
         }
 
         // --- Funções do Jogo ---
@@ -231,6 +233,7 @@
 
             startScreen.classList.add('hidden');
             gameScreen.classList.remove('hidden');
+            gameScreen.classList.add('flex');
             gameState.timerId = setInterval(updateTimer, 1000);
             updateObjectStates();
             showMessage("A sala está trancada. Preciso encontrar o diploma... A gaveta parece ser o primeiro passo.", 5000);
@@ -261,14 +264,14 @@
             clearInterval(gameState.timerId);
             gameScreen.classList.add('hidden');
             endScreen.classList.remove('hidden');
-            endScreen.classList.add('flex'); // Para centralizar o conteúdo
+            endScreen.classList.add('flex');
 
             if (isWin) {
                 successSound.triggerAttackRelease("C5", "0.5");
                  endScreen.innerHTML = `
                     <div class="w-full max-w-4xl">
                         <div class="video-container mb-4 rounded-lg overflow-hidden shadow-2xl">
-                             <iframe src="https://player.vimeo.com/video/1092876055?h=9f2fc19b3b&autoplay=1&loop=1&title=0&byline=0&portrait=0" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>
+                             <iframe src="https://player.vimeo.com/video/1092890946?h=f9b2da8306&autoplay=1&loop=1&title=0&byline=0&portrait=0" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>
                         </div>
                         <h1 class="text-5xl font-bold mb-4 text-green-500">Diploma Recuperado!</h1>
                         <p class="text-xl mb-8">Parabéns! Você provou seu conhecimento e está pronto para a formatura!</p>
@@ -286,22 +289,22 @@
         }
 
         function updateObjectStates() {
-            objComputer.classList.toggle('opacity-50', !gameState.puzzlesSolved[1]);
-            objComputer.classList.toggle('cursor-not-allowed', !gameState.puzzlesSolved[1]);
+            objComputer.classList.toggle('opacity-50', !gameState.puzzlesSolved.drawer);
+            objComputer.classList.toggle('cursor-not-allowed', !gameState.puzzlesSolved.drawer);
 
-            objPanel.classList.toggle('opacity-50', !gameState.puzzlesSolved[4]);
-            objPanel.classList.toggle('cursor-not-allowed', !gameState.puzzlesSolved[4]);
+            objPanel.classList.toggle('opacity-50', !gameState.puzzlesSolved.logicGrid);
+            objPanel.classList.toggle('cursor-not-allowed', !gameState.puzzlesSolved.logicGrid);
 
-            objRecorder.classList.toggle('opacity-50', !gameState.puzzlesSolved[5]);
-            objRecorder.classList.toggle('cursor-not-allowed', !gameState.puzzlesSolved[5]);
+            objRecorder.classList.toggle('opacity-50', !gameState.puzzlesSolved.panel);
+            objRecorder.classList.toggle('cursor-not-allowed', !gameState.puzzlesSolved.panel);
             
-            objSafe.classList.toggle('opacity-50', !gameState.puzzlesSolved[6]);
-            objSafe.classList.toggle('cursor-not-allowed', !gameState.puzzlesSolved[6]);
+            objSafe.classList.toggle('opacity-50', !gameState.puzzlesSolved.recorder);
+            objSafe.classList.toggle('cursor-not-allowed', !gameState.puzzlesSolved.recorder);
         }
 
         // --- Funções de Puzzle e Modais ---
         function showModal(content, isPuzzle=true) {
-             const closeButton = isPuzzle ? `<button onclick="closeModal()" class="absolute top-4 right-4 text-2xl text-gray-500 hover:text-gray-800">&times;</button>` : '';
+            const closeButton = isPuzzle ? `<button onclick="closeModal()" class="absolute top-4 right-4 text-2xl text-gray-500 hover:text-gray-800">&times;</button>` : '';
             modalContent.innerHTML = closeButton + content;
             modalOverlay.classList.remove('hidden');
             setTimeout(() => {
@@ -320,46 +323,14 @@
         
         function showRegimento() {
             clickSound.triggerAttackRelease("F4", "0.1");
-            const regimentoText = `
-                <h2 class="text-2xl font-bold mb-4 text-[#005594]">Regimento Educacional - Consulta</h2>
-                <div class="regimento-content mono">
-                    <p><strong>Art. 16.</strong> A <strong>Secretaria Escolar</strong> é o setor responsável pelos processos de recebimento, conferência, expedição e arquivo da documentação relativa aos registros escolares dos estudantes.</p>
-                    <hr class="my-2">
-                    <p><strong>Art. 26. Dos Deveres dos Estudantes:</strong><br>
-                    ...VII - não praticar atos que possam caracterizar violência de qualquer natureza ou agressão, como importunação sexual, ameaças e intimidação sistemática considerada <strong>bullying</strong> ou <strong>cyberbullying</strong>;<br>
-                    ...IX - utilizar os ambientes e recursos tecnológicos de aprendizagem em estrito alinhamento com a Política de Segurança da Informação (PSI);<br>
-                    ...X - preservar o <strong>patrimônio</strong> da instituição, bem como o patrimônio de instituições parceiras, respondendo por qualquer dano ou prejuízo que venha a causar.</p>
-                    <hr class="my-2">
-                    <p><strong>Art. 28. Das Medidas Reparadoras:</strong> O não cumprimento, pelo estudante, das normas deste Regimento e dos acordos de convivência estabelecidos pela comunidade escolar o torna sujeito às seguintes medidas reparadoras:<br>
-                    I - <strong>advertência</strong>;<br>
-                    II - <strong>suspensão</strong>;<br>
-                    III - <strong>desligamento</strong>.</p>
-                    <hr class="my-2">
-                    <p><strong>Art. 55.</strong> A <strong>frequência mínima de 75%</strong> é obrigatória para aprovação e é apurada na carga horária total ministrada em cada componente curricular.</p>
-                    <hr class="my-2">
-                    <p><strong>Art. 78.</strong> O <strong>diploma</strong> é o documento emitido aos estudantes aprovados em todos os componentes curriculares da Habilitação Profissional Técnica e do Ensino Médio Técnico Integrado.</p>
-                </div>
-                <button onclick="closeModal()" class="mt-4 bg-gray-600 text-white py-2 px-6 rounded-lg font-semibold">Fechar</button>
-            `;
+            const regimentoText = `<h2 class="text-2xl font-bold mb-4 text-[#005594]">Regimento Educacional - Consulta</h2><div class="regimento-content mono"><p><strong>Art. 16.</strong> A <strong>Secretaria Escolar</strong> é o setor responsável pelos processos de recebimento, conferência, expedição e arquivo da documentação relativa aos registros escolares dos estudantes.</p><hr class="my-2"><p><strong>Art. 26. Dos Deveres dos Estudantes:</strong><br>...IX - utilizar os ambientes e recursos tecnológicos de aprendizagem em estrito alinhamento com a Política de Segurança da Informação (PSI);<br>...X - preservar o <strong>patrimônio</strong> da instituição, bem como o patrimônio de instituições parceiras, respondendo por qualquer dano ou prejuízo que venha a causar.</p><hr class="my-2"><p><strong>Art. 28. Das Medidas Reparadoras:</strong> ...sujeito às seguintes medidas reparadoras:<br>I - <strong>advertência</strong>;<br>II - <strong>suspensão</strong>;<br>III - <strong>desligamento</strong>.</p><hr class="my-2"><p><strong>Art. 55.</strong> A <strong>frequência mínima de 75%</strong> é obrigatória para aprovação...</p><hr class="my-2"><p><strong>Art. 78.</strong> O <strong>diploma</strong> é o documento emitido aos estudantes aprovados...</p></div><button onclick="closeModal()" class="mt-4 bg-gray-600 text-white py-2 px-6 rounded-lg font-semibold">Fechar</button>`;
             showModal(regimentoText, false);
         }
         
         // Puzzle 1: Gaveta
         function puzzleDrawer() {
             clickSound.triggerAttackRelease("C4", "0.1");
-            const content = `
-                <h2 class="text-2xl font-bold mb-4 text-[#005594]">Gaveta com Cadeado</h2>
-                <p class="mb-4">Um cadeado de 3 dígitos. Há uma inscrição: "A chave para sua aprovação é a chave para esta gaveta. Qual a frequência mínima obrigatória (Art. 55)?"</p>
-                <div class="flex justify-center gap-2 mb-4">
-                    <input type="number" id="code1" class="input-code text-center border-2 border-gray-300 rounded-lg" maxlength="1" onkeyup="moveToNext(this, 'code2')">
-                    <input type="number" id="code2" class="input-code text-center border-2 border-gray-300 rounded-lg" maxlength="1" onkeyup="moveToNext(this, 'code3')">
-                    <input type="number" id="code3" class="input-code text-center border-2 border-gray-300 rounded-lg" maxlength="1">
-                </div>
-                <div class="flex gap-4 justify-center">
-                    <button onclick="closeModal()" class="bg-gray-500 hover:bg-gray-600 text-white py-2 px-6 rounded-lg font-semibold">Voltar</button>
-                    <button onclick="checkDrawerCode()" class="bg-blue-600 hover:bg-blue-700 text-white py-2 px-6 rounded-lg font-semibold">Abrir</button>
-                </div>
-            `;
+            const content = `<h2 class="text-2xl font-bold mb-4 text-[#005594]">Gaveta com Cadeado</h2><p class="mb-4">"A chave para sua aprovação é a chave para esta gaveta. Qual a frequência mínima obrigatória (Art. 55)?"</p><div class="flex justify-center gap-2 mb-4"><input type="number" id="code1" class="input-code text-center border-2 border-gray-300 rounded-lg" maxlength="1" onkeyup="moveToNext(this, 'code2')"><input type="number" id="code2" class="input-code text-center border-2 border-gray-300 rounded-lg" maxlength="1" onkeyup="moveToNext(this, 'code3')"><input type="number" id="code3" class="input-code text-center border-2 border-gray-300 rounded-lg" maxlength="1"></div><div class="flex gap-4 justify-center"><button onclick="closeModal()" class="bg-gray-500 hover:bg-gray-600 text-white py-2 px-6 rounded-lg font-semibold">Voltar</button><button onclick="checkDrawerCode()" class="bg-blue-600 hover:bg-blue-700 text-white py-2 px-6 rounded-lg font-semibold">Abrir</button></div>`;
             showModal(content);
         }
 
@@ -367,9 +338,9 @@
             const code = document.getElementById('code1').value + document.getElementById('code2').value + document.getElementById('code3').value;
             if (code === '075') {
                 drawerOpenSound();
-                gameState.puzzlesSolved[1] = true;
+                gameState.puzzlesSolved.drawer = true;
                 closeModal();
-                showMessage("Correto! Dentro da gaveta, encontrei uma nota: 'Para ligar o computador, a senha é o nome do setor que cuida da sua vida escolar.'", 6000);
+                showMessage("Correto! Dentro da gaveta, encontrei uma nota: 'Senha do computador: setor que cuida da sua vida escolar.'", 6000);
                 updateObjectStates();
             } else {
                 errorSound.triggerAttackRelease("A2", "0.2");
@@ -377,23 +348,13 @@
             }
         }
         window.moveToNext = function(current, nextFieldID) {
-            if (current.value.length >= current.maxLength) {
-                document.getElementById(nextFieldID).focus();
-            }
+            if (current.value.length >= current.maxLength) { document.getElementById(nextFieldID).focus(); }
         }
 
         // Puzzle 2: Computador Login
         function puzzleComputer() {
              clickSound.triggerAttackRelease("D4", "0.1");
-             const content = `
-                <h2 class="text-2xl font-bold mb-4 text-[#005594]">Login do Sistema</h2>
-                <p class="mb-4">A nota da gaveta dizia: "...a senha é o nome do setor que cuida da sua vida escolar." (Art. 16)</p>
-                <input type="text" id="password-input" class="w-full p-2 border border-gray-400 rounded-md mb-4 text-center uppercase" autocomplete="off">
-                <div class="flex gap-4 justify-center">
-                    <button onclick="closeModal()" class="bg-gray-500 hover:bg-gray-600 text-white py-2 px-6 rounded-lg font-semibold">Voltar</button>
-                    <button onclick="checkComputerPassword()" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-6 rounded-lg font-semibold">Entrar</button>
-                </div>
-             `;
+             const content = `<h2 class="text-2xl font-bold mb-4 text-[#005594]">Login do Sistema</h2><p class="mb-4">A nota da gaveta dizia: "...a senha é o nome do setor que cuida da sua vida escolar." (Art. 16)</p><input type="text" id="password-input" class="w-full p-2 border border-gray-400 rounded-md mb-4 text-center uppercase" autocomplete="off"><div class="flex gap-4 justify-center"><button onclick="closeModal()" class="bg-gray-500 hover:bg-gray-600 text-white py-2 px-6 rounded-lg font-semibold">Voltar</button><button onclick="checkComputerPassword()" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-6 rounded-lg font-semibold">Entrar</button></div>`;
              showModal(content);
         }
 
@@ -401,9 +362,9 @@
             const pass = document.getElementById('password-input').value.toUpperCase().replace(/\s+/g, '');
             if (pass === 'SECRETARIAESCOLAR') {
                 computerStartSound();
-                gameState.puzzlesSolved[2] = true;
+                gameState.puzzlesSolved.computerLogin = true;
                 closeModal();
-                showMessage("Acesso concedido! Há dois arquivos na área de trabalho: um esquema de chave e um relatório protegido.", 6000);
+                showMessage("Acesso concedido! O que temos aqui na Área de Trabalho?", 5000);
                 updateObjectStates();
                 showComputerDesktop();
             } else {
@@ -414,43 +375,47 @@
 
         // Computador Desktop
         function showComputerDesktop() {
-            const isLogicFileUnlocked = gameState.puzzlesSolved[3];
-            const logicFileClasses = isLogicFileUnlocked ? "" : "opacity-50 cursor-not-allowed";
-            const logicFileOnClick = isLogicFileUnlocked ? "onclick='promptForLogicGridPassword()'" : "";
+            const reportFileUnlocked = gameState.puzzlesSolved.jigsaw;
+            const reportFileClasses = reportFileUnlocked ? "cursor-pointer" : "opacity-50 cursor-not-allowed";
+            const reportFileOnClick = reportFileUnlocked ? "onclick='showReportFile()'" : "onclick='showMessage(\"Arquivo protegido. Preciso de uma senha. Talvez o esquema da chave ajude.\", 3000)'";
+            
+            // Lógica da Lixeira corrigida
+            let recycleBinClasses = "opacity-50 cursor-not-allowed";
+            let recycleBinOnClick = "onclick='showMessage(\"Não parece ter nada de importante aqui... por enquanto.\", 3000)'";
+
+            if (gameState.noteRead && !gameState.puzzlesSolved.recycleBin) {
+                recycleBinClasses = "cursor-pointer";
+                recycleBinOnClick = "onclick='puzzleRecycleBin()'";
+            } else if (gameState.puzzlesSolved.recycleBin) {
+                recycleBinClasses = "cursor-pointer";
+                recycleBinOnClick = "onclick='puzzleLogicGrid()'";
+            }
 
             const content = `
                 <h2 class="text-2xl font-bold mb-4 text-[#005594]">Área de Trabalho</h2>
-                <p class="mb-4">Clique em um arquivo para abri-lo.</p>
-                <div class="flex gap-8 justify-center">
+                <div class="grid grid-cols-3 gap-8 text-center">
                     <div class="interactive-object flex flex-col items-center" onclick="puzzleJigsaw()">
                         <span class="text-5xl">🔑</span>
                         <span>esquema_chave.png</span>
                     </div>
-                    <div class="interactive-object flex flex-col items-center ${logicFileClasses}" ${logicFileOnClick}>
-                        <span class="text-5xl">🔒</span>
-                        <span>relatorio.docx</span>
+                    <div class="flex flex-col items-center ${reportFileClasses}" ${reportFileOnClick}>
+                        <span class="text-5xl">📄</span>
+                        <span>nota_bloqueada.txt</span>
+                    </div>
+                    <div class="interactive-object flex flex-col items-center ${recycleBinClasses}" ${recycleBinOnClick}>
+                        <span class="text-5xl">🗑️</span>
+                        <span>Lixeira</span>
                     </div>
                 </div>
-                <button onclick="closeModal()" class="mt-6 bg-gray-500 hover:bg-gray-600 text-white py-2 px-6 rounded-lg font-semibold">Sair do Computador</button>
-            `;
+                <button onclick="closeModal()" class="mt-6 bg-gray-500 hover:bg-gray-600 text-white py-2 px-6 rounded-lg font-semibold">Sair do Computador</button>`;
             showModal(content);
         }
         
         // Puzzle 3: Jigsaw (Chave)
         function puzzleJigsaw() {
             clickSound.triggerAttackRelease("E4", "0.1");
-            const pieces = Array.from({length: 9}, (_, i) => i);
-            pieces.sort(() => Math.random() - 0.5); // Shuffle pieces
-            const content = `
-                <h2 class="text-2xl font-bold mb-4 text-[#005594]">Esquema da Chave</h2>
-                <p class="mb-4">Monte o esquema da chave para descobrir a senha do relatório. Clique em duas peças para trocá-las.</p>
-                <div id="jigsaw-puzzle" class="jigsaw-grid">
-                    ${pieces.map(p => `<div class="jigsaw-piece" data-pos="${p}" onclick="selectJigsawPiece(this)" style="background-position: ${-(p % 3) * 100}px ${-Math.floor(p / 3) * 100}px;"></div>`).join('')}
-                </div>
-                 <div class="flex gap-4 justify-center mt-4">
-                    <button onclick="showComputerDesktop()" class="bg-gray-500 hover:bg-gray-600 text-white py-2 px-6 rounded-lg font-semibold">Voltar</button>
-                </div>
-            `;
+            const pieces = Array.from({length: 9}, (_, i) => i).sort(() => Math.random() - 0.5);
+            const content = `<h2 class="text-2xl font-bold mb-4 text-[#005594]">Esquema da Chave</h2><p class="mb-4">Monte o esquema para revelar a senha da nota.</p><div id="jigsaw-puzzle" class="jigsaw-grid">${pieces.map(p => `<div class="jigsaw-piece" data-pos="${p}" onclick="selectJigsawPiece(this)" style="background-position: ${-(p % 3) * 100}px ${-Math.floor(p / 3) * 100}px;"></div>`).join('')}</div><div class="flex gap-4 justify-center mt-4"><button onclick="showComputerDesktop()" class="bg-gray-500 hover:bg-gray-600 text-white py-2 px-6 rounded-lg font-semibold">Voltar</button></div>`;
             showModal(content);
         }
 
@@ -460,17 +425,12 @@
                 gameState.selectedJigsawPiece = piece;
             } else {
                 const piece1 = gameState.selectedJigsawPiece;
-                const piece2 = piece;
-                
                 const tempPos = piece1.style.backgroundPosition;
                 const tempDataPos = piece1.dataset.pos;
-                
-                piece1.style.backgroundPosition = piece2.style.backgroundPosition;
-                piece1.dataset.pos = piece2.dataset.pos;
-
-                piece2.style.backgroundPosition = tempPos;
-                piece2.dataset.pos = tempDataPos;
-
+                piece1.style.backgroundPosition = piece.style.backgroundPosition;
+                piece1.dataset.pos = piece.dataset.pos;
+                piece.style.backgroundPosition = tempPos;
+                piece.dataset.pos = tempDataPos;
                 piece1.classList.remove('selected');
                 gameState.selectedJigsawPiece = null;
                 checkJigsawSolution();
@@ -482,60 +442,73 @@
             const isSolved = Array.from(pieces).every((p, i) => parseInt(p.dataset.pos) === i);
             if (isSolved) {
                 successSound.triggerAttackRelease("B5", "0.2");
-                gameState.puzzlesSolved[3] = true;
-                showMessage("Esquema montado! A senha do relatório é 'CONHECIMENTO'.", 4000);
+                gameState.puzzlesSolved.jigsaw = true;
+                showMessage("Esquema montado! A imagem forma a palavra 'CONHECIMENTO'. Deve ser a senha da nota.", 5000);
                 setTimeout(showComputerDesktop, 1000);
             }
         }
         
-        function promptForLogicGridPassword() {
-            clickSound.triggerAttackRelease("F4", "0.1");
+        // Arquivo de Nota
+        function showReportFile() {
+             clickSound.triggerAttackRelease("F4", "0.1");
             const content = `
-                <h2 class="text-2xl font-bold mb-4 text-[#005594]">Relatório Protegido</h2>
+                <h2 class="text-2xl font-bold mb-4 text-[#005594]">Nota Protegida</h2>
                 <p class="mb-4">Digite a senha revelada pelo esquema da chave.</p>
-                <input type="text" id="logic-password" class="w-full p-2 border border-gray-400 rounded-md mb-4 text-center uppercase" autocomplete="off">
+                <input type="text" id="report-password" class="w-full p-2 border border-gray-400 rounded-md mb-4 text-center uppercase" autocomplete="off">
                 <div class="flex gap-4 justify-center">
                     <button onclick="showComputerDesktop()" class="bg-gray-500 hover:bg-gray-600 text-white py-2 px-6 rounded-lg font-semibold">Voltar</button>
-                    <button onclick="checkLogicGridPassword()" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-6 rounded-lg font-semibold">Desbloquear</button>
-                </div>
-            `;
+                    <button onclick="checkReportPassword()" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-6 rounded-lg font-semibold">Desbloquear</button>
+                </div>`;
             showModal(content);
         }
 
-        function checkLogicGridPassword() {
-            const pass = document.getElementById('logic-password').value.toUpperCase();
+        function checkReportPassword() {
+            const pass = document.getElementById('report-password').value.toUpperCase();
             if (pass === 'CONHECIMENTO') {
                 successSound.triggerAttackRelease("F5", "0.2");
-                puzzleLogicGrid();
+                gameState.noteRead = true; // Habilita a interação com a lixeira
+                const noteContent = `
+                    <h2 class="text-2xl font-bold mb-4">Nota Desbloqueada</h2>
+                    <p class="text-lg text-left p-4 bg-gray-100 rounded">"O relatório do incidente foi considerado muito sensível e movido para a Lixeira para segurança. A senha de recuperação é o ano em que tudo começou."</p>
+                    <button onclick="showComputerDesktop()" class="mt-4 bg-blue-600 hover:bg-blue-700 text-white py-2 px-6 rounded-lg font-semibold">Voltar para Desktop</button>
+                `;
+                showModal(noteContent);
             } else {
                 errorSound.triggerAttackRelease("A2", "0.2");
                 showMessage("Senha incorreta.", 2000);
             }
         }
 
-        // Puzzle 4: Logic Grid
-        function puzzleLogicGrid() {
+        // Puzzle da Lixeira
+        function puzzleRecycleBin() {
+            clickSound.triggerAttackRelease("A3", "0.1");
             const content = `
-                <h2 class="text-2xl font-bold mb-4 text-[#005594]">Relatório de Incidente</h2>
-                <p class="mb-4">Use o Regimento (Art. 26 e 28) para preencher o relatório e acionar o plot twist.</p>
-                <div class="text-left space-y-2 mb-4 p-4 bg-gray-100 rounded">
-                    <p><strong>Pistas:</strong></p>
-                    <p>1. Ana praticou um ato que NÃO resultou em suspensão.</p>
-                    <p>2. A pessoa que danificou o patrimônio (Art. 26, X) foi desligada.</p>
-                    <p>3. Beto não praticou cyberbullying (Art. 26, VII).</p>
-                </div>
-                <table class="w-full text-center border-collapse">
-                    <thead><tr><th class="border p-2">Aluno</th><th class="border p-2">Infração</th><th class="border p-2">Medida</th></tr></thead>
-                    <tbody>
-                        <tr><td class="border p-2">Ana</td><td class="border p-2"><select id="ana-infraction" class="w-full"><option>Cyberbullying</option><option>Dano ao Patrimônio</option></select></td><td class="border p-2"><select id="ana-medida" class="w-full"><option>Advertência</option><option>Suspensão</option><option>Desligamento</option></select></td></tr>
-                        <tr><td class="border p-2">Beto</td><td class="border p-2"><select id="beto-infraction" class="w-full"><option>Cyberbullying</option><option>Dano ao Patrimônio</option></select></td><td class="border p-2"><select id="beto-medida" class="w-full"><option>Advertência</option><option>Suspensão</option><option>Desligamento</option></select></td></tr>
-                    </tbody>
-                </table>
-                <div class="flex gap-4 justify-center mt-4">
+                <h2 class="text-2xl font-bold mb-4 text-[#005594]">Lixeira Protegida</h2>
+                <p class="mb-4">A nota dizia: "...a senha de recuperação é o ano em que tudo começou."</p>
+                <input type="number" id="recycle-password" class="w-full p-2 border border-gray-400 rounded-md mb-4 text-center" autocomplete="off">
+                <div class="flex gap-4 justify-center">
                     <button onclick="showComputerDesktop()" class="bg-gray-500 hover:bg-gray-600 text-white py-2 px-6 rounded-lg font-semibold">Voltar</button>
-                    <button onclick="checkLogicGrid()" class="bg-blue-600 hover:bg-blue-700 text-white py-2 px-6 rounded-lg font-semibold">Verificar</button>
-                </div>
-            `;
+                    <button onclick="checkRecycleBinPassword()" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-6 rounded-lg font-semibold">Restaurar Arquivos</button>
+                </div>`;
+            showModal(content);
+        }
+
+        function checkRecycleBinPassword() {
+            const pass = document.getElementById('recycle-password').value;
+            if (pass === '1946') {
+                successSound.triggerAttackRelease("G5", "0.2");
+                gameState.puzzlesSolved.recycleBin = true;
+                showMessage("Senha correta! O arquivo 'relatorio.docx' foi restaurado. Agora posso abri-lo.", 5000);
+                puzzleLogicGrid();
+            } else {
+                errorSound.triggerAttackRelease("A2", "0.2");
+                showMessage("Senha incorreta. Onde posso encontrar uma data importante?", 3000);
+            }
+        }
+
+        // Puzzle de Lógica
+        function puzzleLogicGrid() {
+            const content = `<h2 class="text-2xl font-bold mb-4 text-[#005594]">Relatório de Incidente</h2><p class="mb-4">Use o Regimento para preencher o relatório.</p><div class="text-left space-y-2 mb-4 p-4 bg-gray-100 rounded"><p><strong>Pistas:</strong></p><p>1. Ana praticou um ato que NÃO resultou em suspensão.</p><p>2. A pessoa que danificou o patrimônio (Art. 26, X) foi desligada.</p><p>3. Beto não praticou cyberbullying.</p></div><table class="w-full text-center border-collapse"><thead><tr><th class="border p-2">Aluno</th><th class="border p-2">Infração</th><th class="border p-2">Medida</th></tr></thead><tbody><tr><td class="border p-2">Ana</td><td class="border p-2"><select id="ana-infraction" class="w-full"><option>Cyberbullying</option><option>Dano ao Patrimônio</option></select></td><td class="border p-2"><select id="ana-medida" class="w-full"><option>Advertência</option><option>Suspensão</option><option>Desligamento</option></select></td></tr><tr><td class="border p-2">Beto</td><td class="border p-2"><select id="beto-infraction" class="w-full"><option>Cyberbullying</option><option>Dano ao Patrimônio</option></select></td><td class="border p-2"><select id="beto-medida" class="w-full"><option>Advertência</option><option>Suspensão</option><option>Desligamento</option></select></td></tr></tbody></table><div class="flex gap-4 justify-center mt-4"><button onclick="showComputerDesktop()" class="bg-gray-500 hover:bg-gray-600 text-white py-2 px-6 rounded-lg font-semibold">Voltar</button><button onclick="checkLogicGrid()" class="bg-blue-600 hover:bg-blue-700 text-white py-2 px-6 rounded-lg font-semibold">Verificar</button></div>`;
             showModal(content);
         }
 
@@ -546,7 +519,7 @@
             const betoMedida = document.getElementById('beto-medida').value;
             if (anaInfraction === 'Cyberbullying' && anaMedida === 'Advertência' && betoInfraction === 'Dano ao Patrimônio' && betoMedida === 'Desligamento') {
                 successSound.triggerAttackRelease("C6", "0.2");
-                gameState.puzzlesSolved[4] = true;
+                gameState.puzzlesSolved.logicGrid = true;
                 closeModal();
                 setTimeout(showPlotTwist, 1000);
             } else {
@@ -562,18 +535,7 @@
                 updateObjectStates();
                 return;
             }
-             const content = `
-                <h2 class="text-2xl font-bold mb-4 text-yellow-500">Chamada de Vídeo Recebida...</h2>
-                <div class="video-container mb-4">
-                    <!-- INSTRUÇÃO: Substitua o ID e o HASH do vídeo abaixo pelo do seu vídeo no Vimeo -->
-                    <iframe src="https://player.vimeo.com/video/1092796983?h=329987718c&autoplay=1&loop=1&autopause=0" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>
-                </div>
-                <p id="call-text" class="mb-4 min-h-[48px]">Um colega desesperado aparece na tela pedindo ajuda com o código da gaveta em troca de um atalho...</p>
-                <div id="call-buttons" class="flex gap-4 justify-center mt-6">
-                    <button onclick="handlePlotTwistChoice('refuse')" class="bg-red-600 hover:bg-red-700 text-white py-2 px-6 rounded-lg font-semibold">Recusar Ajuda</button>
-                    <button onclick="handlePlotTwistChoice('help')" class="bg-green-600 hover:bg-green-700 text-white py-2 px-6 rounded-lg font-semibold">Ajudar o Colega</button>
-                </div>
-            `;
+             const content = `<h2 class="text-2xl font-bold mb-4 text-yellow-500">Chamada de Vídeo Recebida...</h2><div class="video-container mb-4"><iframe src="https://player.vimeo.com/video/1092796983?h=329987718c&autoplay=1&loop=1&autopause=0" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe></div><p id="call-text" class="mb-4 min-h-[48px]">Um colega desesperado aparece na tela pedindo ajuda...</p><div id="call-buttons" class="flex gap-4 justify-center mt-6"><button onclick="handlePlotTwistChoice('refuse')" class="bg-red-600 hover:bg-red-700 text-white py-2 px-6 rounded-lg font-semibold">Recusar Ajuda</button><button onclick="handlePlotTwistChoice('help')" class="bg-green-600 hover:bg-green-700 text-white py-2 px-6 rounded-lg font-semibold">Ajudar o Colega</button></div>`;
             showModal(content, false);
         }
 
@@ -585,47 +547,32 @@
                 gameState.timer = Math.floor(gameState.timer / 2);
                 closeModal();
                 showMessage("VIOLAÇÃO! Tentativa de fraude detectada. Tempo reduzido pela metade!", 8000);
-            } else { // refuse
+            } else { 
                 successSound.triggerAttackRelease("E6", "0.3");
                 gameState.timer += 180; // +3 minutos
                 closeModal();
-                showMessage("CONDUTA ÉTICA VERIFICADA! Recompensa por integridade: +3 minutos.", 8000);
+                showMessage("CONDUTA ÉTICA VERIFICADA! Recompensa: +3 minutos.", 8000);
             }
-            setTimeout(() => showMessage("O painel elétrico da sala acendeu.", 4000), 1000);
+            setTimeout(() => showMessage("O painel elétrico da sala acendeu.", 8000), 8000);
             updateObjectStates();
         }
         
-        // Puzzle 5: Painel Elétrico
+        // Puzzle: Painel Elétrico
         function puzzlePanel() {
             clickSound.triggerAttackRelease("C4", "0.1");
             gameState.panelSequence = [];
-            const content = `
-                <h2 class="text-2xl font-bold mb-4 text-[#005594]">Painel Elétrico</h2>
-                <p class="mb-4">Para restaurar a energia, acione os disjuntores na ordem correta das Medidas Reparadoras (Art. 28).</p>
-                <div class="flex justify-center gap-4 mb-4">
-                    <button id="btn-susp" onclick="pressPanelButton('suspensao')" class="switch p-4 rounded bg-gray-400">Suspensão</button>
-                    <button id="btn-desl" onclick="pressPanelButton('desligamento')" class="switch p-4 rounded bg-gray-400">Desligamento</button>
-                    <button id="btn-adv" onclick="pressPanelButton('advertencia')" class="switch p-4 rounded bg-gray-400">Advertência</button>
-                </div>
-                <div id="panel-display" class="h-8 bg-gray-200 rounded text-black flex items-center justify-center mono"></div>
-                <div class="flex gap-4 justify-center mt-4">
-                     <button onclick="closeModal()" class="bg-gray-500 hover:bg-gray-600 text-white py-2 px-6 rounded-lg font-semibold">Voltar</button>
-                </div>
-            `;
+            const content = `<h2 class="text-2xl font-bold mb-4 text-[#005594]">Painel Elétrico</h2><p class="mb-4">Acione os disjuntores na ordem correta das Medidas Reparadoras (Art. 28).</p><div class="flex justify-center gap-4 mb-4"><button id="btn-susp" onclick="pressPanelButton('suspensao')" class="p-4 rounded bg-gray-400">Suspensão</button><button id="btn-desl" onclick="pressPanelButton('desligamento')" class="p-4 rounded bg-gray-400">Desligamento</button><button id="btn-adv" onclick="pressPanelButton('advertencia')" class="p-4 rounded bg-gray-400">Advertência</button></div><div id="panel-display" class="h-8 bg-gray-200 rounded text-black flex items-center justify-center mono"></div><div class="flex gap-4 justify-center mt-4"><button onclick="closeModal()" class="bg-gray-500 hover:bg-gray-600 text-white py-2 px-6 rounded-lg font-semibold">Voltar</button></div>`;
             showModal(content);
         }
         
         function pressPanelButton(btn) {
             clickSound.triggerAttackRelease("E5", "0.05");
             gameState.panelSequence.push(btn);
-            const display = document.getElementById('panel-display');
-            display.textContent = gameState.panelSequence.join(' -> ').toUpperCase();
-
+            document.getElementById('panel-display').textContent = gameState.panelSequence.join(' -> ').toUpperCase();
             if (gameState.panelSequence.length === 3) {
-                const correctSequence = ['advertencia', 'suspensao', 'desligamento'];
-                if (JSON.stringify(gameState.panelSequence) === JSON.stringify(correctSequence)) {
+                if (JSON.stringify(gameState.panelSequence) === JSON.stringify(['advertencia', 'suspensao', 'desligamento'])) {
                     successSound.triggerAttackRelease("C6", "0.2");
-                    gameState.puzzlesSolved[5] = true;
+                    gameState.puzzlesSolved.panel = true;
                     closeModal();
                     showMessage("Energia restaurada! O gravador sobre a mesa começou a emitir um ruído.", 5000);
                     updateObjectStates();
@@ -637,19 +584,11 @@
             }
         }
         
-        // Puzzle 6: Gravador de Áudio
+        // Puzzle: Gravador de Áudio
         function puzzleRecorder() {
             clickSound.triggerAttackRelease("F4", "0.1");
             staticNoise.start().stop("+0.5");
-             const content = `
-                <h2 class="text-2xl font-bold mb-4 text-[#005594]">Gravador Antigo</h2>
-                <p class="mb-4">O gravador toca uma mensagem distorcida. Parece dizer: <span class="mono text-red-500">"...pr3s3rv4r o p4tr1môn1o..."</span>. Qual é a palavra-chave final, conforme o Art. 26, X?</p>
-                <input type="text" id="audio-password" class="w-full p-2 border border-gray-400 rounded-md mb-4 text-center uppercase" autocomplete="off">
-                <div class="flex gap-4 justify-center">
-                    <button onclick="closeModal()" class="bg-gray-500 hover:bg-gray-600 text-white py-2 px-6 rounded-lg font-semibold">Voltar</button>
-                    <button onclick="checkAudioPassword()" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-6 rounded-lg font-semibold">Verificar</button>
-                </div>
-             `;
+             const content = `<h2 class="text-2xl font-bold mb-4 text-[#005594]">Gravador Antigo</h2><p class="mb-4">O gravador toca: <span class="mono text-red-500">"...pr3s3rv4r o p4tr1môn1o..."</span>. Qual é a palavra-chave final (Art. 26, X)?</p><input type="text" id="audio-password" class="w-full p-2 border border-gray-400 rounded-md mb-4 text-center uppercase" autocomplete="off"><div class="flex gap-4 justify-center"><button onclick="closeModal()" class="bg-gray-500 hover:bg-gray-600 text-white py-2 px-6 rounded-lg font-semibold">Voltar</button><button onclick="checkAudioPassword()" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-6 rounded-lg font-semibold">Verificar</button></div>`;
              showModal(content);
         }
 
@@ -657,9 +596,9 @@
             const pass = document.getElementById('audio-password').value.toUpperCase();
             if(pass === 'PATRIMONIO') {
                 successSound.triggerAttackRelease("D6", "0.2");
-                gameState.puzzlesSolved[6] = true;
+                gameState.puzzlesSolved.recorder = true;
                 closeModal();
-                showMessage("Palavra decifrada! Uma luz pisca no cofre os números: '6' '8' '2' e '7'.", 6000);
+                showMessage("Palavra decifrada! Uma luz pisca no cofre os números: '2' '6' '7' e '8'.", 6000);
                 updateObjectStates();
             } else {
                 errorSound.triggerAttackRelease("A2", "0.2");
@@ -667,25 +606,17 @@
             }
         }
 
-        // Puzzle 7: Cofre Final
+        // Puzzle: Cofre Final
         function puzzleSafe() {
             clickSound.triggerAttackRelease("G4", "0.1");
-            const content = `
-                <h2 class="text-2xl font-bold mb-4 text-[#005594]">O Cofre Final</h2>
-                <p class="mb-4">O código parece ser a junção de dois números de artigo. A luz pisca os números 26 e 78. Qual a ordem correta, pensando no percurso de um aluno (Regras e depois o Prêmio)?</p>
-                <input type="text" id="safe-password" class="w-full p-3 border border-gray-400 rounded-md mb-4 text-center mono text-2xl" autocomplete="off" placeholder="XXXX">
-                 <div class="flex gap-4 justify-center">
-                    <button onclick="closeModal()" class="bg-gray-500 hover:bg-gray-600 text-white py-2 px-6 rounded-lg font-semibold">Voltar</button>
-                    <button onclick="checkSafePassword()" class="w-full bg-green-600 hover:bg-green-700 text-white py-2 px-6 rounded-lg font-semibold">Abrir Cofre</button>
-                </div>
-            `;
+            const content = `<h2 class="text-2xl font-bold mb-4 text-[#005594]">O Cofre Final</h2><p class="mb-4">O código é a junção de dois artigos. A luz pisca '2','6','7','8'. Qual a ordem correta, pensando no percurso de um aluno (Regras e depois o Prêmio)?</p><input type="text" id="safe-password" class="w-full p-3 border border-gray-400 rounded-md mb-4 text-center mono text-2xl" autocomplete="off" placeholder="XXXX"><div class="flex gap-4 justify-center"><button onclick="closeModal()" class="bg-gray-500 hover:bg-gray-600 text-white py-2 px-6 rounded-lg font-semibold">Voltar</button><button onclick="checkSafePassword()" class="w-full bg-green-600 hover:bg-green-700 text-white py-2 px-6 rounded-lg font-semibold">Abrir Cofre</button></div>`;
             showModal(content);
         }
 
         function checkSafePassword() {
             const pass = document.getElementById('safe-password').value;
             if (pass === '2678') { // Art. 26 (Regras) + Art. 78 (Prêmio)
-                gameState.puzzlesSolved[7] = true;
+                gameState.puzzlesSolved.safe = true;
                 closeModal();
                 endGame(true);
             } else {
@@ -694,35 +625,83 @@
             }
         }
         
+        // --- Funções para Novos Objetos ---
+        function showCalendar() {
+            clickSound.triggerAttackRelease("G4", "0.1");
+            const content = `
+                <h2 class="text-2xl font-bold mb-4 text-[#005594]">Calendário de Parede</h2>
+                <div class="p-4 bg-gray-100 rounded-lg text-center">
+                    <p class="text-lg">Um calendário antigo...</p>
+                    <p class="text-6xl font-bold my-4 text-red-600 border-4 border-red-500 rounded-full inline-block p-4">1946</p>
+                    <p class="text-lg mono">Anotação: "O início de tudo."</p>
+                </div>
+                <button onclick="closeModal()" class="mt-4 bg-gray-600 text-white py-2 px-6 rounded-lg font-semibold">Fechar</button>
+            `;
+            showModal(content, false);
+        }
+
+        function showBoard() {
+             clickSound.triggerAttackRelease("A4", "0.1");
+            const content = `
+                 <h2 class="text-2xl font-bold mb-4 text-[#005594]">Quadro de Avisos</h2>
+                 <div class="p-4 bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700">
+                    <p class="font-bold">Vem ai o Casa Aberta!!!:</p>
+                    <p>Abrimos as portas de nossas 63 unidades para um dia repleto de atividades inspiradoras, que vão desde workshops e palestras até atendimentos e oficinas. Participe!.</p>
+                 </div>
+                 <div class="p-4 mt-4 bg-blue-100 border-l-4 border-blue-500 text-blue-700">
+                    <p class="font-bold">Minuto Regimento:</p>
+                    <p>Respeitar as diferenças é um compromisso de todos! O regimento garante um ambiente escolar livre de discriminação e preconceito, promovendo o respeito às identidades e culturas de cada aluno. 
+                    </p>
+                 </div>
+                  <button onclick="closeModal()" class="mt-4 bg-gray-600 text-white py-2 px-6 rounded-lg font-semibold">Fechar</button>
+            `;
+            showModal(content, false);
+        }
+
+
         // --- Event Listeners ---
         startButton.addEventListener('click', startGame);
         
         objDrawer.addEventListener('click', () => {
-            if (!gameState.puzzlesSolved[1]) puzzleDrawer();
+            if (!gameState.puzzlesSolved.drawer) puzzleDrawer();
             else showMessage("Eu já abri esta gaveta.", 2000);
         });
         objComputer.addEventListener('click', () => {
-            if (gameState.puzzlesSolved[1] && !gameState.puzzlesSolved[2]) puzzleComputer();
-            else if (!gameState.puzzlesSolved[1]) showMessage("Preciso de uma pista para ligar isso. Talvez na gaveta?", 3000);
-            else if (gameState.puzzlesSolved[2] && !gameState.puzzlesSolved[4]) showComputerDesktop();
-            else if (gameState.puzzlesSolved[4] && !gameState.plotTwistShown) showPlotTwist();
-            else showMessage("Acho que já fiz tudo que precisava no computador.", 3000)
+            if (!gameState.puzzlesSolved.drawer) {
+                 showMessage("Preciso de uma pista para ligar isso. Talvez na gaveta?", 3000);
+                 return;
+            }
+            if (!gameState.puzzlesSolved.computerLogin) {
+                puzzleComputer();
+                return;
+            }
+            if (gameState.puzzlesSolved.computerLogin && !gameState.puzzlesSolved.logicGrid) {
+                showComputerDesktop();
+                return;
+            }
+             if (gameState.puzzlesSolved.logicGrid && !gameState.plotTwistShown) {
+                showPlotTwist();
+                return;
+            }
+            showMessage("Acho que já fiz tudo que precisava no computador.", 3000);
         });
         objPanel.addEventListener('click', () => {
-            if(gameState.puzzlesSolved[4] && !gameState.puzzlesSolved[5]) puzzlePanel();
-            else if (!gameState.puzzlesSolved[4]) showMessage("O painel está sem energia. Preciso resolver o enigma do computador primeiro.", 4000);
+            if(gameState.puzzlesSolved.logicGrid && !gameState.puzzlesSolved.panel) puzzlePanel();
+            else if (!gameState.puzzlesSolved.logicGrid) showMessage("O painel está sem energia. Preciso resolver os enigmas do computador primeiro.", 4000);
             else showMessage("A energia já foi restaurada.", 2000);
         });
         objRecorder.addEventListener('click', () => {
-             if(gameState.puzzlesSolved[5] && !gameState.puzzlesSolved[6]) puzzleRecorder();
-            else if (!gameState.puzzlesSolved[5]) showMessage("O gravador não liga. Falta energia?", 3000);
+             if(gameState.puzzlesSolved.panel && !gameState.puzzlesSolved.recorder) puzzleRecorder();
+            else if (!gameState.puzzlesSolved.panel) showMessage("O gravador não liga. Falta energia?", 3000);
             else showMessage("Já ouvi a mensagem deste gravador.", 2000);
         });
         objSafe.addEventListener('click', () => {
-            if (gameState.puzzlesSolved[6] && !gameState.puzzlesSolved[7]) puzzleSafe();
-            else if (!gameState.puzzlesSolved[6]) showMessage("Este cofre parece ser o desafio final. Preciso resolver os outros enigmas primeiro.", 4000);
+            if (gameState.puzzlesSolved.recorder && !gameState.puzzlesSolved.safe) puzzleSafe();
+            else if (!gameState.puzzlesSolved.recorder) showMessage("Este cofre parece ser o desafio final. Preciso resolver os outros enigmas primeiro.", 4000);
         });
         objBook.addEventListener('click', showRegimento);
+        objCalendar.addEventListener('click', showCalendar); 
+        objBoard.addEventListener('click', showBoard);       
 
     </script>
 </body>
